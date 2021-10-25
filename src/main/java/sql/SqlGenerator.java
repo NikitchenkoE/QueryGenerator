@@ -37,9 +37,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String findById(Object object) throws IllegalAccessException, ClassNotFoundException {
-        Class clazz = object.getClass();
-
+    public String findById(Object object, Class clazz) throws IllegalAccessException, ClassNotFoundException {
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
@@ -62,7 +60,7 @@ public class SqlGenerator implements QueryGenerator {
                     field.setAccessible(true);
                     Column column = field.getAnnotation(Column.class);
                     idColumnName = column.name().isEmpty() ? field.getName() : column.name();
-                    id = field.getInt(object);
+                    id = Integer.parseInt(object.toString());
                 }
             }
         }
@@ -80,9 +78,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String insert(Object value) throws IllegalAccessException {
-        Class clazz = value.getClass();
-
+    public String insert(Object value, Class clazz) throws IllegalAccessException {
         hasEntityAnnotation(clazz);
 
         String tableName = tableName(clazz);
@@ -103,9 +99,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String remove(Object id) throws IllegalAccessException {
-        Class clazz = id.getClass();
-
+    public String remove(Object id,Class clazz) throws IllegalAccessException {
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
@@ -128,9 +122,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String update(Object value) throws IllegalAccessException {
-        Class clazz = value.getClass();
-
+    public String update(Object value, Class clazz) throws IllegalAccessException {
         String idColumnName = "";
         int userId = 0;
 
