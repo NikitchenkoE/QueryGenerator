@@ -165,7 +165,6 @@ public class SqlGenerator implements QueryGenerator {
 
     private String tableName(Class clazz) {
         Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
-        String tableName = entityAnnotation.table().isEmpty() ? clazz.getName() : entityAnnotation.table();
-        return tableName;
+        return entityAnnotation.table().isEmpty() ? clazz.getName() : entityAnnotation.table();
     }
 }
