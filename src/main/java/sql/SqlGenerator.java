@@ -37,15 +37,16 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String findById(Object object, Class clazz) throws IllegalAccessException, ClassNotFoundException {
+    public String findById(Object objectId, Class clazz) throws IllegalAccessException, ClassNotFoundException {
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
-        int id = 0;
+        int id = Integer.parseInt(objectId.toString());
 
         StringBuilder query = new StringBuilder("SELECT ");
 
         String tableName = tableName(clazz);
+
         StringJoiner columnNames = new StringJoiner(", ");
 
         for (Field field : clazz.getDeclaredFields()) {
@@ -60,7 +61,6 @@ public class SqlGenerator implements QueryGenerator {
                     field.setAccessible(true);
                     Column column = field.getAnnotation(Column.class);
                     idColumnName = column.name().isEmpty() ? field.getName() : column.name();
-                    id = Integer.parseInt(object.toString());
                 }
             }
         }
@@ -95,6 +95,7 @@ public class SqlGenerator implements QueryGenerator {
         }
         query.append(columnNames);
         query.append(");");
+
         return query.toString();
     }
 
@@ -152,7 +153,7 @@ public class SqlGenerator implements QueryGenerator {
                 }
             }
         }
-        stringBuilder.append(columnNames).append(" WHERE ").append(idColumnName).append(" = ").append(userId);
+        stringBuilder.append(columnNames).append(" WHERE ").append(idColumnName).append(" = ").append(userId).append(";");
         return stringBuilder.toString();
     }
 

@@ -84,7 +84,7 @@ public class SqlQueryGeneratorTest {
     public void updateById() throws IllegalAccessException {
         SqlGenerator sqlGenerator = new SqlGenerator();
         Person person = new Person(58,"Jacl",6500.0);
-        String expected = "UPDATE persons SET id = 58, person_name = 'Jacl', salary = 6500.0 WHERE id = 58";
+        String expected = "UPDATE persons SET id = 58, person_name = 'Jacl', salary = 6500.0 WHERE id = 58;";
         String actual = sqlGenerator.update(person, Person.class);
         assertEquals(expected, actual);
     }
