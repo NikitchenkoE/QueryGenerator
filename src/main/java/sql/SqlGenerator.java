@@ -12,7 +12,7 @@ public class SqlGenerator implements QueryGenerator {
     @Override
     public String findAll(Class<?> clazz) {
         hasEntityAnnotation(clazz);
-        StringBuilder sql = new StringBuilder("SELECT ");
+        StringBuilder query = new StringBuilder("SELECT ");
         String tableName = tableName(clazz);
 
         StringJoiner columnNames = new StringJoiner(", ");
@@ -28,12 +28,9 @@ public class SqlGenerator implements QueryGenerator {
             }
         }
 
-        sql.append(columnNames);
-        sql.append(" FROM ");
-        sql.append(tableName);
-        sql.append(";");
+        query.append(columnNames).append(" FROM ").append(tableName).append(";");
 
-        return sql.toString();
+        return query.toString();
     }
 
     @Override
@@ -62,27 +59,21 @@ public class SqlGenerator implements QueryGenerator {
             }
         }
 
-        query.append(columnNames);
-        query.append(" FROM ");
-        query.append(tableName);
-        query.append(" WHERE ");
-        query.append(idColumnName);
-        query.append(" = ");
-        query.append(id);
-        query.append(";");
+        query.append(columnNames).append(" FROM ").append(tableName).append(" WHERE ").append(idColumnName)
+        .append(" = ").append(id).append(";");
 
         return query.toString();
     }
 
     @Override
-    public String insert(Object value, Class<?> clazz) {
+    public String insert(Object value) {
+        Class<?> clazz = value.getClass();
         hasEntityAnnotation(clazz);
 
         String tableName = tableName(clazz);
 
         StringBuilder query = new StringBuilder("INSERT INTO ").append(tableName).append(" VALUES ").append("(");
         StringJoiner columnNames = new StringJoiner(", ");
-
         Field[] declaredFields = clazz.getDeclaredFields();
 
         try {
@@ -105,7 +96,8 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String remove(Object id, Class<?> clazz) {
+    public String remove(Object id) {
+        Class<?> clazz = id.getClass();
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
@@ -132,7 +124,8 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String update(Object value, Class<?> clazz) {
+    public String update(Object value) {
+        Class<?> clazz = value.getClass();
         String idColumnName = "";
         int userId = 0;
 

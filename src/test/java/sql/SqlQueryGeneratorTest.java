@@ -44,7 +44,7 @@ public class SqlQueryGeneratorTest {
         SqlGenerator sqlGenerator = new SqlGenerator();
         Person person = new Person(25, "Jess", 2500.0);
         String expected = "INSERT INTO persons VALUES (25, 'Jess', 2500.0);";
-        String actual = sqlGenerator.insert(person, Person.class);
+        String actual = sqlGenerator.insert(person);
         assertEquals(expected, actual);
     }
 
@@ -53,7 +53,7 @@ public class SqlQueryGeneratorTest {
         SqlGenerator sqlGenerator = new SqlGenerator();
         PersonWithoutAnnotation person = new PersonWithoutAnnotation();
         String expected = "Annotation @Entity should be present";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.insert(person, PersonWithoutAnnotation.class));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.insert(person));
         String actualMessage = exception.getMessage();
 
         assertEquals(expected, actualMessage);
@@ -65,7 +65,7 @@ public class SqlQueryGeneratorTest {
         Person person = new Person();
         person.setId(25);
         String expected = "DELETE FROM persons WHERE id=25;";
-        String actual = sqlGenerator.remove(person, Person.class);
+        String actual = sqlGenerator.remove(person);
         assertEquals(expected, actual);
     }
 
@@ -74,7 +74,7 @@ public class SqlQueryGeneratorTest {
         SqlGenerator sqlGenerator = new SqlGenerator();
         PersonWithoutAnnotation person = new PersonWithoutAnnotation();
         String expected = "Annotation @Entity should be present";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.remove(person, PersonWithoutAnnotation.class));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.remove(person));
         String actualMessage = exception.getMessage();
 
         assertEquals(expected, actualMessage);
@@ -85,7 +85,7 @@ public class SqlQueryGeneratorTest {
         SqlGenerator sqlGenerator = new SqlGenerator();
         Person person = new Person(58, "Jacl", 6500.0);
         String expected = "UPDATE persons SET id = 58, person_name = 'Jacl', salary = 6500.0 WHERE id = 58;";
-        String actual = sqlGenerator.update(person, Person.class);
+        String actual = sqlGenerator.update(person);
         assertEquals(expected, actual);
     }
 

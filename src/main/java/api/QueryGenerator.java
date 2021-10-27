@@ -5,9 +5,9 @@ public interface QueryGenerator {
 
     String findById(Object id, Class<?> clazz);
 
-    String insert(Object value, Class<?> clazz);
+    String insert(Object value);
 
-    String remove(Object id, Class<?> clazz);
+    String remove(Object id);
 
-    String update(Object value, Class<?> clazz);
+    String update(Object value);
 }
