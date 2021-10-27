@@ -12,7 +12,6 @@ public class SqlGenerator implements QueryGenerator {
     @Override
     public String findAll(Class<?> clazz) {
         hasEntityAnnotation(clazz);
-
         StringBuilder sql = new StringBuilder("SELECT ");
         String tableName = tableName(clazz);
 
@@ -40,22 +39,19 @@ public class SqlGenerator implements QueryGenerator {
     @Override
     public String findById(Object objectId, Class<?> clazz) {
         hasEntityAnnotation(clazz);
-
         String idColumnName = "";
-        int id = Integer.parseInt(objectId.toString());
+        String id = objectId.toString();
 
         StringBuilder query = new StringBuilder("SELECT ");
-
         String tableName = tableName(clazz);
-
         StringJoiner columnNames = new StringJoiner(", ");
 
         for (Field field : clazz.getDeclaredFields()) {
             Column columnAnnotation = field.getAnnotation(Column.class);
+
             if (columnAnnotation != null) {
                 String columnNameFromAnnotation = columnAnnotation.name();
                 String columnName = columnNameFromAnnotation.isEmpty() ? field.getName() : columnNameFromAnnotation;
-
                 columnNames.add(columnName);
 
                 if (field.getAnnotation(Id.class) != null) {
@@ -71,7 +67,7 @@ public class SqlGenerator implements QueryGenerator {
         query.append(tableName);
         query.append(" WHERE ");
         query.append(idColumnName);
-        query.append(" LIKE ");
+        query.append(" = ");
         query.append(id);
         query.append(";");
 
@@ -181,7 +177,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     private String tableName(Class<?> clazz) {
-        Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
+        Entity entityAnnotation = clazz.getAnnotation(Entity.class);
         return entityAnnotation.table().isEmpty() ? clazz.getName() : entityAnnotation.table();
     }
 }

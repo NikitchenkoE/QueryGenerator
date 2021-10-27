@@ -21,7 +21,7 @@ public class SqlQueryGeneratorTest {
     @Test
     public void testFindByIdReturnValidQuery() {
         SqlGenerator sqlGenerator = new SqlGenerator();
-        String expected = "SELECT id, person_name, salary FROM persons WHERE id LIKE 225;";
+        String expected = "SELECT id, person_name, salary FROM persons WHERE id = 225;";
         Object id = 225;
 
         String actual = sqlGenerator.findById(225, Person.class);
