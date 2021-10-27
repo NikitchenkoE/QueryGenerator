@@ -19,17 +19,17 @@ public class SqlQueryGeneratorTest {
     }
 
     @Test
-    public void testFindByIdReturnValidQuery() throws IllegalAccessException, ClassNotFoundException {
+    public void testFindByIdReturnValidQuery() {
         SqlGenerator sqlGenerator = new SqlGenerator();
         String expected = "SELECT id, person_name, salary FROM persons WHERE id LIKE 225;";
         Object id = 225;
 
-        String actual = sqlGenerator.findById(225,Person.class);
+        String actual = sqlGenerator.findById(225, Person.class);
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testFindById_Exception() throws ClassNotFoundException, IllegalAccessException {
+    public void testFindById_Exception() {
         SqlGenerator sqlGenerator = new SqlGenerator();
         PersonWithoutAnnotation person = new PersonWithoutAnnotation();
         String expected = "Annotation @Entity should be present";
@@ -40,27 +40,27 @@ public class SqlQueryGeneratorTest {
     }
 
     @Test
-    public void testInsertReturnValidQuery() throws IllegalAccessException {
+    public void testInsertReturnValidQuery() {
         SqlGenerator sqlGenerator = new SqlGenerator();
-        Person person = new Person(25,"Jess",2500.0);
+        Person person = new Person(25, "Jess", 2500.0);
         String expected = "INSERT INTO persons VALUES (25, 'Jess', 2500.0);";
-        String actual = sqlGenerator.insert(person,Person.class);
+        String actual = sqlGenerator.insert(person, Person.class);
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testInsertException(){
+    public void testInsertException() {
         SqlGenerator sqlGenerator = new SqlGenerator();
         PersonWithoutAnnotation person = new PersonWithoutAnnotation();
         String expected = "Annotation @Entity should be present";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.insert(person,PersonWithoutAnnotation.class));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.insert(person, PersonWithoutAnnotation.class));
         String actualMessage = exception.getMessage();
 
         assertEquals(expected, actualMessage);
     }
 
     @Test
-    public void deleteById() throws IllegalAccessException {
+    public void deleteById() {
         SqlGenerator sqlGenerator = new SqlGenerator();
         Person person = new Person();
         person.setId(25);
@@ -70,20 +70,20 @@ public class SqlQueryGeneratorTest {
     }
 
     @Test
-    public void testDeleteException(){
+    public void testDeleteException() {
         SqlGenerator sqlGenerator = new SqlGenerator();
         PersonWithoutAnnotation person = new PersonWithoutAnnotation();
         String expected = "Annotation @Entity should be present";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.remove(person,PersonWithoutAnnotation.class));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> sqlGenerator.remove(person, PersonWithoutAnnotation.class));
         String actualMessage = exception.getMessage();
 
         assertEquals(expected, actualMessage);
     }
 
     @Test
-    public void updateById() throws IllegalAccessException {
+    public void updateById() {
         SqlGenerator sqlGenerator = new SqlGenerator();
-        Person person = new Person(58,"Jacl",6500.0);
+        Person person = new Person(58, "Jacl", 6500.0);
         String expected = "UPDATE persons SET id = 58, person_name = 'Jacl', salary = 6500.0 WHERE id = 58;";
         String actual = sqlGenerator.update(person, Person.class);
         assertEquals(expected, actual);

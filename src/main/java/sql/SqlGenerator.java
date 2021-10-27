@@ -3,6 +3,7 @@ package sql;
 import api.QueryGenerator;
 import domain.Column;
 import domain.Entity;
+import domain.Id;
 
 import java.lang.reflect.Field;
 import java.util.StringJoiner;
@@ -37,7 +38,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String findById(Object objectId, Class clazz) throws IllegalAccessException, ClassNotFoundException {
+    public String findById(Object objectId, Class<?> clazz) {
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
@@ -57,7 +58,7 @@ public class SqlGenerator implements QueryGenerator {
 
                 columnNames.add(columnName);
 
-                if (field.getName().equals("id")) {
+                if (field.getAnnotation(Id.class) != null) {
                     field.setAccessible(true);
                     Column column = field.getAnnotation(Column.class);
                     idColumnName = column.name().isEmpty() ? field.getName() : column.name();
@@ -78,7 +79,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String insert(Object value, Class clazz) throws IllegalAccessException {
+    public String insert(Object value, Class<?> clazz) {
         hasEntityAnnotation(clazz);
 
         String tableName = tableName(clazz);
@@ -87,12 +88,20 @@ public class SqlGenerator implements QueryGenerator {
         StringJoiner columnNames = new StringJoiner(", ");
 
         Field[] declaredFields = clazz.getDeclaredFields();
-        for (Field currentField : declaredFields) {
-            currentField.setAccessible(true);
-            if (currentField.getType().toString().equals("class java.lang.String")) {
-                columnNames.add(String.format("'%s'", currentField.get(value)));
-            } else columnNames.add(currentField.get(value).toString());
+
+        try {
+            for (Field currentField : declaredFields) {
+                currentField.setAccessible(true);
+                if (currentField.getType() == String.class) {
+                    columnNames.add(String.format("'%s'", currentField.get(value)));
+                } else {
+                    columnNames.add(currentField.get(value).toString());
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
+
         query.append(columnNames);
         query.append(");");
 
@@ -100,7 +109,7 @@ public class SqlGenerator implements QueryGenerator {
     }
 
     @Override
-    public String remove(Object id,Class clazz) throws IllegalAccessException {
+    public String remove(Object id, Class<?> clazz) {
         hasEntityAnnotation(clazz);
 
         String idColumnName = "";
@@ -110,20 +119,24 @@ public class SqlGenerator implements QueryGenerator {
 
         StringBuilder query = new StringBuilder("DELETE FROM ").append(tableName).append(" WHERE ");
         Field[] declaredFields = clazz.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            if (declaredField.getName().equals("id")) {
-                declaredField.setAccessible(true);
-                Column columnName = declaredField.getAnnotation(Column.class);
-                idColumnName = columnName.name().isEmpty() ? declaredField.getName() : columnName.name();
-                userId = declaredField.getInt(id);
+        try {
+            for (Field declaredField : declaredFields) {
+                if (declaredField.getAnnotation(Id.class) != null) {
+                    declaredField.setAccessible(true);
+                    Column columnName = declaredField.getAnnotation(Column.class);
+                    idColumnName = columnName.name().isEmpty() ? declaredField.getName() : columnName.name();
+                    userId = declaredField.getInt(id);
+                }
             }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
         query.append(idColumnName).append("=").append(userId).append(";");
         return query.toString();
     }
 
     @Override
-    public String update(Object value, Class clazz) throws IllegalAccessException {
+    public String update(Object value, Class<?> clazz) {
         String idColumnName = "";
         int userId = 0;
 
@@ -134,36 +147,40 @@ public class SqlGenerator implements QueryGenerator {
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
 
         Field[] declaredFields = clazz.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            declaredField.setAccessible(true);
-            if (declaredField.getType().toString().equals("class java.lang.String")) {
-                Column column = declaredField.getAnnotation(Column.class);
-                String columnName = column.name().isEmpty() ? declaredField.getName() : column.name();
-                columnNames.add(String.format("%s = '%s'", columnName, declaredField.get(value)));
-            } else {
-                Column column = declaredField.getAnnotation(Column.class);
-                String columnName = column.name().isEmpty() ? declaredField.getName() : column.name();
-                columnNames.add(String.format("%s = %s", columnName, declaredField.get(value)));
+        try {
+            for (Field declaredField : declaredFields) {
+                declaredField.setAccessible(true);
+                if (declaredField.getType() == String.class) {
+                    Column column = declaredField.getAnnotation(Column.class);
+                    String columnName = column.name().isEmpty() ? declaredField.getName() : column.name();
+                    columnNames.add(String.format("%s = '%s'", columnName, declaredField.get(value)));
+                } else {
+                    Column column = declaredField.getAnnotation(Column.class);
+                    String columnName = column.name().isEmpty() ? declaredField.getName() : column.name();
+                    columnNames.add(String.format("%s = %s", columnName, declaredField.get(value)));
 
-                if (declaredField.getName().equals("id")) {
-                    declaredField.setAccessible(true);
-                    Column annotationColumnName = declaredField.getAnnotation(Column.class);
-                    idColumnName = annotationColumnName.name().isEmpty() ? declaredField.getName() : annotationColumnName.name();
-                    userId = declaredField.getInt(value);
+                    if (declaredField.getAnnotation(Id.class) != null) {
+                        declaredField.setAccessible(true);
+                        Column annotationColumnName = declaredField.getAnnotation(Column.class);
+                        idColumnName = annotationColumnName.name().isEmpty() ? declaredField.getName() : annotationColumnName.name();
+                        userId = declaredField.getInt(value);
+                    }
                 }
             }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
         stringBuilder.append(columnNames).append(" WHERE ").append(idColumnName).append(" = ").append(userId).append(";");
         return stringBuilder.toString();
     }
 
-    private void hasEntityAnnotation(Class clazz) {
+    private void hasEntityAnnotation(Class<?> clazz) {
         if (!clazz.isAnnotationPresent(Entity.class)) {
             throw new IllegalArgumentException("Annotation @Entity should be present");
         }
     }
 
-    private String tableName(Class clazz) {
+    private String tableName(Class<?> clazz) {
         Entity entityAnnotation = (Entity) clazz.getAnnotation(Entity.class);
         return entityAnnotation.table().isEmpty() ? clazz.getName() : entityAnnotation.table();
     }
